@@ -1,5 +1,6 @@
 package BookingService.BookingService.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -38,5 +39,6 @@ public class ServiceEntity {
 
     // Một dịch vụ có thể có nhiều hình ảnh
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<Image> images;
 }

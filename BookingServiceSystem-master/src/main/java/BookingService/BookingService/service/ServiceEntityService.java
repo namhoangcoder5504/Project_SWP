@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ServiceEntityService {
@@ -24,29 +25,18 @@ public class ServiceEntityService {
                 .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_EXISTED));
     }
 
-    /**
-     * Thêm một ảnh (URL) vào service.
-     * Giả sử chúng ta đã upload ảnh lên CDN/S3
-     * và chỉ cần lưu link vào DB.
-     */
+    // Thêm ảnh vào service (chỉ lưu URL)
     public Image addImageToService(Long serviceId, String imageUrl) {
-        // Tìm service
         ServiceEntity service = getServiceById(serviceId);
-
-        // Tạo đối tượng Image
         Image image = Image.builder()
                 .url(imageUrl)
                 .createdAt(LocalDateTime.now())
                 .service(service)
                 .build();
-
-        // Lưu vào DB
         return imageRepository.save(image);
     }
 
-    // Các hàm CRUD khác cho ServiceEntity
-    // (create, update, delete service)...
-
+    // CRUD cho ServiceEntity
     public ServiceEntity createService(ServiceEntity service) {
         service.setCreatedAt(LocalDateTime.now());
         service.setUpdatedAt(LocalDateTime.now());

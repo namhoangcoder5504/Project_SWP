@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "blog")
 @Getter
@@ -26,7 +25,7 @@ public class Blog {
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER) // Đảm bảo load đầy đủ Author
     @JoinColumn(name = "author_id")
     User author;
 
@@ -35,4 +34,15 @@ public class Blog {
 
     @Column(name = "updated_at")
     LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

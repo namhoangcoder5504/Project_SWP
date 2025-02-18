@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,7 +33,7 @@ public class Booking {
     User specialist;
 
     @Column(name = "booking_date")
-    LocalDateTime bookingDate;
+    LocalDate bookingDate;
 
     @Column(name = "time_slot")
     String timeSlot;

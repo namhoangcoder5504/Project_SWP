@@ -2,11 +2,15 @@ package BookingService.BookingService.service;
 
 import BookingService.BookingService.dto.request.AuthenticationRequest;
 import BookingService.BookingService.dto.request.IntrospectRequest;
+import BookingService.BookingService.dto.request.LogoutRequest;
+import BookingService.BookingService.dto.request.RefreshRequest;
 import BookingService.BookingService.dto.response.AuthenticationResponse;
 import BookingService.BookingService.dto.response.IntrospectResponse;
+import BookingService.BookingService.entity.InvalidatedToken;
 import BookingService.BookingService.entity.User;
 import BookingService.BookingService.exception.AppException;
 import BookingService.BookingService.exception.ErrorCode;
+import BookingService.BookingService.repository.InvalidatedTokenRepository;
 import BookingService.BookingService.repository.UserRepository;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.Payload;
@@ -31,6 +35,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,10 +45,19 @@ import java.util.Date;
 public class AuthenticationService {
 
     UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+
 
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    protected long REFRESHABLE_DURATION;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByEmail(request.getEmail())
@@ -61,21 +76,17 @@ public class AuthenticationService {
                 .build();
     }
 
-    public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {
-        String token = request.getToken();
-        if (!StringUtils.hasText(token)) {
-            return IntrospectResponse.builder().valid(false).build();
+    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+        var token = request.getToken();
+        boolean isValid = true;
+
+        try {
+            verifyToken(token, false);
+        } catch (AppException e) {
+            isValid = false;
         }
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        boolean verified = signedJWT.verify(verifier);
-
-        Date expiry = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean valid = verified && expiry.after(new Date());
-
-        return IntrospectResponse.builder().valid(valid).build();
+        return IntrospectResponse.builder().valid(isValid).build();
     }
 
     private String generateToken(User user) {
@@ -88,10 +99,10 @@ public class AuthenticationService {
                     .subject(user.getEmail())
                     .issuer("BookingService")
                     .issueTime(new Date())
-                    .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
+                    .expirationTime(Date.from(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS)))
+                    .jwtID(UUID.randomUUID().toString())
                     .claim("role", user.getRole().name())
                     .build();
-
             // Payload
             Payload payload = new Payload(claimsSet.toJSONObject());
             JWSObject jwsObject = new JWSObject(header, payload);
@@ -105,4 +116,65 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
+
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT
+                .getJWTClaimsSet()
+                .getIssueTime()
+                .toInstant()
+                .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                .toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        try {
+            var signToken = verifyToken(request.getToken(), true);
+
+            String jit = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+            InvalidatedToken invalidatedToken =
+                    InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+
+            invalidatedTokenRepository.save(invalidatedToken);
+        } catch (AppException exception) {
+            log.info("Token already expired");
+        }
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(request.getToken(), true);
+
+        var jit = signedJWT.getJWTClaimsSet().getJWTID(); // lay id cua token
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();  // lay thoi gian
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+        var email = signedJWT.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED)); // lay thong tin user
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
 }

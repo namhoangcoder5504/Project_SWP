@@ -33,40 +33,49 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
-
     /**
      * Tạo user mới
      */
-    public User createUser(UserCreationRequest request) {
-        // Kiểm tra trùng email
+    public UserResponse createUser(UserCreationRequest request) {
+        // Kiểm tra email trùng
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        // Map DTO -> Entity
+
+        // Chuyển đổi DTO thành Entity
         User user = userMapper.toUser(request);
 
-        // Encode password
+        // Mã hóa mật khẩu
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // Gán role mặc định
+        // Gán vai trò mặc định là CUSTOMER
         user.setRole(Role.CUSTOMER);
-        // Set thời gian tạo/cập nhật
+
+        // Thiết lập thời gian tạo và cập nhật
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        // Lưu vào cơ sở dữ liệu
+        userRepository.save(user);
+
+        // Trả về đối tượng phản hồi
+        return userMapper.toUserResponse(user);
+    }
+
+
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     /**
      * Lấy thông tin user
      */
-    @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
-
     /**
      * Chỉ ADMIN mới được lấy danh sách users
      */
@@ -107,6 +116,12 @@ public class UserService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
         userRepository.deleteById(userId);
+    }
+    public List<UserResponse> getUsersByRole(Role role) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == role)
+                .map(userMapper::toUserResponse)
+                .toList();
     }
 
 
