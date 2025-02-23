@@ -34,7 +34,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     Role role;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = )
     private ForgotPassword forgotPassword;
 
 

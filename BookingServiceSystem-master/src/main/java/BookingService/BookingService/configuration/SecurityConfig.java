@@ -23,14 +23,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableWebSecurity
-public class    SecurityConfig {
+public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/users",            // Tạo user
             "/auth/token",       // Lấy token
-            "/auth/introspect"  , // Kiểm tra token
+            "/auth/introspect", // Kiểm tra token
             "/auth/logout"       // logout
             , "/auth/refresh"    // refresh token
+            , "/forgotPassword/**"   // forgot password
     };
 
     @Value("${jwt.signerKey}")
