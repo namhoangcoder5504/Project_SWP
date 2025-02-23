@@ -1,0 +1,4 @@
+package BookingService.BookingService.controller;
+
+public class TestMailController {
+}
