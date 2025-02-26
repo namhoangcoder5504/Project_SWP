@@ -84,4 +84,13 @@ public class BookingController {
         BookingResponse response = bookingService.checkOutBooking(id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','STAFF','SPECIALIST')")
+    public ResponseEntity<List<BookingResponse>> getBookingsForCurrentUser() {
+        List<BookingResponse> responses = bookingService.getBookingsForCurrentUser();
+        return ResponseEntity.ok(responses);
+    }
+
+
 }
