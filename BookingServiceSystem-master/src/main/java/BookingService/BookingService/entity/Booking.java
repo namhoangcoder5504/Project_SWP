@@ -1,6 +1,7 @@
 package BookingService.BookingService.entity;
 
 import BookingService.BookingService.enums.BookingStatus;
+import BookingService.BookingService.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -39,7 +40,7 @@ public class Booking {
     String timeSlot;
 
     @Enumerated(EnumType.STRING)
-    BookingStatus status;
+    BookingStatus status; // Ví dụ: NEW, CHECK_IN, IN_PROGRESS, COMPLETED
 
     @Column(name = "check_in_time")
     LocalDateTime checkInTime;
@@ -55,4 +56,11 @@ public class Booking {
 
     @Column(name = "updated_at")
     LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    PaymentStatus paymentStatus;
+    // PENDING (đang chờ thanh toán), SUCCESS (thanh toán thành công), FAILED (thất bại)...
+
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    Payment payment;
 }

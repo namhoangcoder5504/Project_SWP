@@ -1,10 +1,12 @@
 package BookingService.BookingService.dto.request;
 
+import BookingService.BookingService.enums.SkinType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 public class ServiceEntityRequest {
@@ -19,4 +21,6 @@ public class ServiceEntityRequest {
 
     @NotNull(message = "Service duration is required")
     private Integer duration;
+
+    private Set<SkinType> recommendedSkinTypes; // Thêm trường này
 }
