@@ -24,10 +24,17 @@ public enum ErrorCode {
     WISHLIST_NOT_FOUND(1030, "Wishlist is not found", HttpStatus.NOT_FOUND),
     IMAGE_NOT_FOUND(1032, "Image is not found", HttpStatus.NOT_FOUND),
     WISHLIST_NOT_ALLOWED(1031, "Wishlist is not allowed", HttpStatus.UNAUTHORIZED),
+
     BLOG_NOT_EXISTED(1026, "Blog not existed", HttpStatus.NOT_FOUND),
     NAME_INVALID(1007, "Name must not be blank", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(1008, "You do not have permission", HttpStatus.FORBIDDEN),
-
+    INVALID_TIME_SLOT_FORMAT(1033, "Time slot format is invalid", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_AVAILABLE(1034, "Schedule is not available", HttpStatus.BAD_REQUEST),
+    TIME_SLOT_UNAVAILABLE(1035, "Time slot is already booked", HttpStatus.BAD_REQUEST),
+    BOOKING_SERVICE_LIMIT_EXCEEDED(1040, "Maximum number of services per booking exceeded", HttpStatus.BAD_REQUEST),
+    BOOKING_DATE_IN_PAST(1041, "Booking date must be in the future", HttpStatus.BAD_REQUEST),
+    BOOKING_DURATION_EXCEEDS_TIME_SLOT(1042, "Total service duration exceeds time slot", HttpStatus.BAD_REQUEST),
+    BOOKING_CANCEL_TIME_EXPIRED(1043, "Cannot cancel booking less than 24 hours before start time", HttpStatus.BAD_REQUEST),
 
     // ✅ Thêm lỗi cho Quiz
     QUIZ_QUESTION_NOT_FOUND(1040, "Quiz question not found", HttpStatus.NOT_FOUND),

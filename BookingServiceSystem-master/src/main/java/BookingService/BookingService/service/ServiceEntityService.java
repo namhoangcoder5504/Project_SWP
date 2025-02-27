@@ -2,6 +2,7 @@ package BookingService.BookingService.service;
 
 import BookingService.BookingService.entity.Image;
 import BookingService.BookingService.entity.ServiceEntity;
+import BookingService.BookingService.enums.SkinType;
 import BookingService.BookingService.exception.AppException;
 import BookingService.BookingService.exception.ErrorCode;
 import BookingService.BookingService.repository.ImageRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +61,21 @@ public class ServiceEntityService {
 
     public List<ServiceEntity> getAllServices() {
         return serviceRepository.findAll();
+    }
+    public List<ServiceEntity> searchServicesByName(String name) {
+        // Trường hợp name rỗng hoặc null, trả về tất cả services hoặc danh sách rỗng tùy yêu cầu
+        if (name == null || name.trim().isEmpty()) {
+            return serviceRepository.findAll(); // hoặc return Collections.emptyList();
+        }
+
+        // Tìm kiếm services theo tên (không phân biệt hoa thường)
+        return serviceRepository.findByNameContainingIgnoreCase(name.trim());
+    }
+
+    // Thêm phương thức tìm dịch vụ theo loại da
+    public List<ServiceEntity> getServicesBySkinType(SkinType skinType) {
+        return serviceRepository.findAll().stream()
+                .filter(service -> service.getRecommendedSkinTypes() != null && service.getRecommendedSkinTypes().contains(skinType))
+                .collect(Collectors.toList());
     }
 }
