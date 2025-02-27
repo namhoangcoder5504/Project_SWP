@@ -204,4 +204,24 @@ public BookingResponse createBooking(BookingRequest request) {
 
         return bookingMapper.toResponse(booking);
     }
+
+    public List<BookingResponse> getBookingsForCurrentUser() {
+        // 1) Lấy email người dùng hiện tại
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 2) Lấy thông tin user dựa trên email
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        // 3) Lấy danh sách booking thuộc về user này (cần có phương thức tìm kiếm trong repository)
+        List<Booking> bookings = bookingRepository.findByCustomer(currentUser);
+
+        // 4) Map danh sách booking sang BookingResponse và trả về
+        return bookings.stream()
+                .map(bookingMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
+
 }

@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/feedback")
+@RequestMapping("/api/feedbacks")
 @RequiredArgsConstructor
 public class FeedbackController {
 
     private final FeedBackService feedBackService;
 
     // Tạo feedback cho một booking
-    @PostMapping("/create")
+    @PostMapping()
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FeedbackResponse> createFeedback(@RequestBody FeedbackRequest feedbackRequest) {
         FeedbackResponse feedbackResponse = feedBackService.createFeedback(feedbackRequest);
@@ -40,7 +40,7 @@ public class FeedbackController {
     }
 
     // Lấy tất cả feedback (cho admin và staff quản lý)
-    @GetMapping("/all")
+    @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public ResponseEntity<List<FeedbackResponse>> getAllFeedback() {
         List<FeedbackResponse> feedbacks = feedBackService.getAllFeedback();
