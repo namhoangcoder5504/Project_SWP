@@ -29,3 +29,7 @@ jwt:
   signerKey: "3aF+lAiyA/tEAeeBtmlou0RwdTwXx0lU6SjH0MYBR7DRt9vyJzlv66uqnqHMP2NW"
   valid-duration: 3600
   refreshable-duration: 36000
+
+beautya:
+  feedback:
+    link: http://localhost:8080/BookingService/api/feedbacks

@@ -4,109 +4,113 @@ import BookingService.BookingService.dto.request.ScheduleRequest;
 import BookingService.BookingService.dto.response.ScheduleResponse;
 import BookingService.BookingService.entity.Schedule;
 import BookingService.BookingService.entity.User;
+import BookingService.BookingService.exception.AppException;
+import BookingService.BookingService.exception.ErrorCode;
 import BookingService.BookingService.mapper.ScheduleMapper;
 import BookingService.BookingService.service.ScheduleService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/schedules")
+@RequiredArgsConstructor
 public class ScheduleController {
 
-    @Autowired
-    private ScheduleService scheduleService;
+    private final ScheduleService scheduleService;
+    private final ScheduleMapper scheduleMapper;
 
-    /**
-     * 1. Lấy toàn bộ Schedule
-     */
+    @PostMapping("/bulk")
+    public ResponseEntity<List<ScheduleResponse>> createSchedules(@Valid @RequestBody List<ScheduleRequest> requests) {
+        List<Schedule> schedules = requests.stream()
+                .map(request -> {
+                    User specialist = scheduleService.getSpecialistById(request.getSpecialistId());
+                    Schedule schedule = scheduleMapper.toEntity(request);
+                    schedule.setSpecialist(specialist);
+                    return schedule;
+                })
+                .collect(Collectors.toList());
+
+        List<Schedule> savedSchedules = scheduleService.createSchedules(schedules);
+        List<ScheduleResponse> responses = savedSchedules.stream()
+                .map(scheduleMapper::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
+    }
+
     @GetMapping
     public ResponseEntity<List<ScheduleResponse>> getAllSchedules() {
         List<ScheduleResponse> responseList = scheduleService.getAllSchedules()
                 .stream()
-                .map(ScheduleMapper::toResponse)
+                .map(scheduleMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responseList);
     }
 
-    /**
-     * 2. Lấy 1 Schedule theo ID
-     */
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleResponse> getScheduleById(@PathVariable Long id) {
         return scheduleService.getScheduleById(id)
-                .map(schedule -> {
-                    ScheduleResponse responseDTO = ScheduleMapper.toResponse(schedule);
-                    return ResponseEntity.ok(responseDTO);
+                .map(schedule -> ResponseEntity.ok(scheduleMapper.toResponse(schedule)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<ScheduleResponse> createSchedule(@Valid @RequestBody ScheduleRequest request) {
+        User specialist = scheduleService.getSpecialistById(request.getSpecialistId());
+        Schedule scheduleEntity = scheduleMapper.toEntity(request);
+        scheduleEntity.setSpecialist(specialist);
+        Schedule savedSchedule = scheduleService.createSchedule(scheduleEntity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleMapper.toResponse(savedSchedule));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ScheduleResponse> updateSchedule(
+            @PathVariable Long id,
+            @Valid @RequestBody ScheduleRequest request) {
+        return scheduleService.getScheduleById(id)
+                .map(existingSchedule -> {
+                    User specialist = scheduleService.getSpecialistById(request.getSpecialistId());
+                    Schedule newData = scheduleMapper.toEntity(request);
+                    newData.setSpecialist(specialist);
+                    Schedule updatedSchedule = scheduleService.updateSchedule(existingSchedule, newData);
+                    return ResponseEntity.ok(scheduleMapper.toResponse(updatedSchedule));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * 3. Tạo mới Schedule
-     *    - Gọi createSchedule trong service để kiểm tra trùng slot
-     */
-    @PostMapping
-    public ResponseEntity<ScheduleResponse> createSchedule(@Valid @RequestBody ScheduleRequest request) {
-        // 1. Lấy specialist (User) từ service/repository
-        User specialist = scheduleService.getSpecialistById(request.getSpecialistId());
-
-        // 2. Map DTO -> Entity
-        Schedule scheduleEntity = ScheduleMapper.toEntity(request, specialist);
-
-        // 3. Tạo lịch (đã kèm logic check trùng slot)
-        Schedule savedSchedule = scheduleService.createSchedule(scheduleEntity);
-
-        // 4. Map Entity -> DTO
-        ScheduleResponse responseDTO = ScheduleMapper.toResponse(savedSchedule);
-        return ResponseEntity.ok(responseDTO);
-    }
-
-    /**
-     * 4. Cập nhật 1 Schedule
-     *    - Nếu user thay đổi date/timeSlot/specialist, vẫn kiểm tra trùng slot
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<ScheduleResponse> updateSchedule(
-            @PathVariable Long id,
-            @Valid @RequestBody ScheduleRequest request
-    ) {
-        // Lấy schedule cũ
-        var existingScheduleOpt = scheduleService.getScheduleById(id);
-        if (existingScheduleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        Schedule existingSchedule = existingScheduleOpt.get();
-
-        // Lấy specialist
-        User specialist = scheduleService.getSpecialistById(request.getSpecialistId());
-
-        // Tạo object mới chứa dữ liệu cập nhật
-        Schedule newData = ScheduleMapper.toEntity(request, specialist);
-
-        // Gọi service update (sẽ kiểm tra conflict và loại trừ bản ghi hiện tại)
-        Schedule updatedSchedule = scheduleService.updateSchedule(existingSchedule, newData);
-
-        // Trả về DTO
-        ScheduleResponse responseDTO = ScheduleMapper.toResponse(updatedSchedule);
-        return ResponseEntity.ok(responseDTO);
-    }
-
-
-    /**
-     * 5. Xoá 1 Schedule
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
-        var existingScheduleOpt = scheduleService.getScheduleById(id);
-        if (existingScheduleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        try {
+            scheduleService.deleteSchedule(id);
+            return ResponseEntity.noContent().build();
+        } catch (AppException e) {
+            if (e.getErrorCode() == ErrorCode.SCHEDULE_NOT_FOUND) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        scheduleService.deleteSchedule(id);
-        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/specialist/{specialistId}/date/{date}")
+    public ResponseEntity<List<ScheduleResponse>> getSchedulesBySpecialistAndDate(
+            @PathVariable Long specialistId,
+            @PathVariable("date") LocalDate date) {
+        List<ScheduleResponse> responseList = scheduleService.getSchedulesBySpecialistAndDate(specialistId, date)
+                .stream()
+                .map(scheduleMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseList);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + ex.getMessage());
     }
 }
