@@ -15,6 +15,7 @@ public class ServiceEntityMapper {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .duration(request.getDuration())
+                .recommendedSkinTypes(request.getRecommendedSkinTypes()) // Ánh xạ trường mới
                 .build();
     }
 
@@ -28,6 +29,7 @@ public class ServiceEntityMapper {
         response.setDuration(entity.getDuration());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
+        response.setRecommendedSkinTypes(entity.getRecommendedSkinTypes()); // Ánh xạ trường mới
         return response;
     }
 }

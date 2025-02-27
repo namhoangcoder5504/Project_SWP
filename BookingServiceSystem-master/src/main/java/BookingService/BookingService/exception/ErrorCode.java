@@ -23,11 +23,16 @@ public enum ErrorCode {
     WISHLIST_DUPLICATE(1029, "Wishlist is duplicated", HttpStatus.NOT_FOUND),
     WISHLIST_NOT_FOUND(1030, "Wishlist is not found", HttpStatus.NOT_FOUND),
     IMAGE_NOT_FOUND(1032, "Image is not found", HttpStatus.NOT_FOUND),
-    WISHLIST_NOT_ALLOWED(1031, "Wishlist is not allow", HttpStatus.UNAUTHORIZED),
+    WISHLIST_NOT_ALLOWED(1031, "Wishlist is not allowed", HttpStatus.UNAUTHORIZED),
     BLOG_NOT_EXISTED(1026, "Blog not existed", HttpStatus.NOT_FOUND),
     NAME_INVALID(1007, "Name must not be blank", HttpStatus.BAD_REQUEST),
-    UNAUTHORIZED(1008, "You do not have permission", HttpStatus.FORBIDDEN);
+    UNAUTHORIZED(1008, "You do not have permission", HttpStatus.FORBIDDEN),
 
+
+    // ✅ Thêm lỗi cho Quiz
+    QUIZ_QUESTION_NOT_FOUND(1040, "Quiz question not found", HttpStatus.NOT_FOUND),
+    DATA_ALREADY_EXISTS(1042, "Data already exists", HttpStatus.BAD_REQUEST),
+    QUIZ_ANSWER_NOT_FOUND(1041, "Quiz answer not found", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;
@@ -38,5 +43,4 @@ public enum ErrorCode {
         this.message = message;
         this.status = status;
     }
-
 }
