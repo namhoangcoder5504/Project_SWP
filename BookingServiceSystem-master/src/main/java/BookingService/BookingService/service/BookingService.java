@@ -130,7 +130,7 @@ public class BookingService {
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
+                "<img src='https://i.ibb.co/F46xfC1B/1.jpg' alt='Skin Care Image' class='email-image'>" +
                 "<h2>Đặt Lịch Thành Công</h2></div>" +
                 "<div class='content'>" +
                 "<p>Xin chào " + customer.getName() + ",</p>" +
@@ -240,7 +240,7 @@ public class BookingService {
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
+                "<img src='https://i.ibb.co/F46xfC1B/1.jpg' alt='Skin Care Image' class='email-image'>" +
                 "<h2>Cập Nhật Lịch Hẹn</h2></div>" +
                 "<div class='content'>" +
                 "<p>Xin chào " + customer.getName() + ",</p>" +
@@ -299,7 +299,7 @@ public class BookingService {
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
+                "<img src='https://i.ibb.co/F46xfC1B/1.jpg' alt='Skin Care Image' class='email-image'>" +
                 "<h2>Hủy Lịch Hẹn</h2></div>" +
                 "<div class='content'>" +
                 "<p>Xin chào " + booking.getCustomer().getName() + ",</p>" +
@@ -350,7 +350,7 @@ public class BookingService {
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
+                "<img src='https://i.ibb.co/F46xfC1B/1.jpg' alt='Skin Care Image' class='email-image'>" +
                 "<h2>Xác Nhận Check-in</h2></div>" +
                 "<div class='content'>" +
                 "<p>Xin chào " + booking.getCustomer().getName() + ",</p>" +
@@ -390,7 +390,7 @@ public class BookingService {
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
-                "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
+                "<img src='https://i.ibb.co/F46xfC1B/1.jpg' alt='Skin Care Image' class='email-image'>" +
                 "<h2>Hoàn Tất Dịch Vụ</h2></div>" +
                 "<div class='content'>" +
                 "<p>Xin chào " + booking.getCustomer().getName() + ",</p>" +

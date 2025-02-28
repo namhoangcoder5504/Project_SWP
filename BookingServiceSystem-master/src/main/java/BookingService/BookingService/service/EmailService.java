@@ -42,31 +42,65 @@ public class EmailService {
 
             // Tạo nội dung HTML cho email
             String htmlContent = "<!DOCTYPE html>" +
-                    "<html>" +
+                    "<html lang=\"vi\">" +
                     "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+                    "<title>Beautya - Chăm Sóc Sắc Đẹp</title>" +
                     "<style>" +
-                    "body { font-family: Arial, sans-serif; color: #333; }" +
-                    ".container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }" +
-                    ".header { background-color: #ff7e9d; color: white; padding: 10px; text-align: center; border-radius: 5px 5px 0 0; }" +
-                    ".content { padding: 20px; background-color: white; border-radius: 0 0 5px 5px; }" +
-                    ".footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }" +
-                    ".icon { width: 50px; height: 50px; }" +
+                    "/* Reset CSS */" +
+                    "* { margin: 0; padding: 0; box-sizing: border-box; }" +
+                    "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background-color: #f8f6f5; line-height: 1.6; }" +
+                    ".container { max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }" +
+                    ".header { background: linear-gradient(135deg, #e89b9b 0%, #d47a8c 100%); padding: 30px 20px; text-align: center; color: white; }" +
+                    ".header h1 { font-size: 32px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }" +
+                    ".header p { font-size: 16px; opacity: 0.9; margin-top: 5px; }" +
+                    ".content { padding: 30px; }" +
+                    ".greeting { font-size: 22px; font-weight: 600; color: #d47a8c; margin-bottom: 15px; }" +
+                    ".text-content { font-size: 16px; color: #555; }" +
+                    ".text-content p { margin-bottom: 20px; }" +
+                    ".highlight { background: linear-gradient(90deg, #f8e1e1 0%, #fcebeb 100%); padding: 15px; border-radius: 8px; margin: 20px 0; }" +
+                    ".cta-button { display: inline-block; background: linear-gradient(135deg, #e89b9b 0%, #d47a8c 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 50px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }" +
+                    ".cta-button:hover { background: linear-gradient(135deg, #d47a8c 0%, #e89b9b 100%); }" +
+                    ".signature { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #eee; font-size: 14px; color: #777; }" +
+                    ".social-icons { margin: 20px 0; text-align: center; }" +
+                    ".social-icons a { color: #d47a8c; text-decoration: none; margin: 0 12px; font-size: 14px; font-weight: 500; }" +
+                    ".footer { text-align: center; font-size: 12px; color: #999; padding: 20px; background-color: #fafafa; border-top: 1px solid #eee; }" +
+                    "/* Responsive styles */" +
+                    "@media only screen and (min-width: 481px) {" +
+                    "    .container { margin: 30px auto; border-radius: 12px; overflow: hidden; }" +
+                    "    .header h1 { font-size: 36px; }" +
+                    "    .content { padding: 40px; }" +
+                    "}" +
                     "</style>" +
                     "</head>" +
                     "<body>" +
-                    "<div class='container'>" +
-                    "<div class='header'>" +
-                    "<img src='https://img.icons8.com/fluency/50/000000/face-massage.png' alt='Skin Care Icon' class='icon'>" +
-                    "<h2>Tư Vấn Chăm Sóc Da</h2>" +
+                    "<div class=\"container\">" +
+                    "<div class=\"header\">" +
+                    "<h1>Beautya</h1>" +
+                    "<p>Chăm sóc sắc đẹp - Nâng niu vẻ đẹp của bạn</p>" +
                     "</div>" +
-                    "<div class='content'>" +
-                    "<p>Xin chào,</p>" +
-                    "<p>" + body + "</p>" + // Nội dung từ người dùng
-                    "<p>Chúng tôi rất vui được hỗ trợ bạn trong hành trình chăm sóc da. Nếu có bất kỳ thắc mắc nào, đừng ngần ngại liên hệ!</p>" +
-                    "<p>Trân trọng,<br>Đội ngũ SkinCare</p>" +
+                    "<div class=\"content\">" +
+                    "<div class=\"text-content\">" +
+                    "<p>" + body + "</p>" + // Nội dung động từ tham số body
+                    "<div class=\"highlight\">" +
+                    "<p>Chúng tôi tin rằng mỗi người đều sở hữu vẻ đẹp riêng biệt, và Beautya ở đây để giúp bạn tỏa sáng theo cách đặc biệt nhất.</p>" +
                     "</div>" +
-                    "<div class='footer'>" +
-                    "© 2025 SkinCare Service. All rights reserved." +
+                    "<p>Hãy để chúng tôi đồng hành cùng bạn trong hành trình chăm sóc sắc đẹp với những giải pháp cá nhân hóa tốt nhất.</p>" +
+                    "<a href=\"#\" class=\"cta-button\">Khám Phá Ngay</a>" +
+                    "<div class=\"signature\">" +
+                    "<p>Trân trọng,<br>Đội ngũ Beautya</p>" +
+                    "</div>" +
+                    "</div>" +
+                    "</div>" +
+                    "<div class=\"social-icons\">" +
+                    "<a href=\"#\">Facebook</a> • " +
+                    "<a href=\"#\">Instagram</a> • " +
+                    "<a href=\"#\">Twitter</a>" +
+                    "</div>" +
+                    "<div class=\"footer\">" +
+                    "© 2025 Beatya Beauty. All rights reserved.<br>" +
+                    "Địa chỉ: 456 Đường Sắc Đẹp, Quận 1, TP.HCM" +
                     "</div>" +
                     "</div>" +
                     "</body>" +
@@ -79,5 +113,4 @@ public class EmailService {
             throw new RuntimeException("Gửi email thất bại: " + e.getMessage());
         }
     }
-
 }
