@@ -2,6 +2,9 @@ package BookingService.BookingService.configuration;
 
 
 import BookingService.BookingService.enums.Role;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +21,12 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -29,9 +36,12 @@ public class SecurityConfig {
             "/api/users",            // Tạo user
             "/auth/token",       // Lấy token
             "/auth/introspect", // Kiểm tra token
-            "/auth/logout"       // logout
-            , "/auth/refresh"    // refresh token
-            , "/forgotPassword/**"   // forgot password
+            "/auth/logout",       // logout
+            "/auth/refresh",   // refresh token
+            "/forgotPassword/**",   // forgot password
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
     };
 
     @Value("${jwt.signerKey}")
@@ -45,12 +55,11 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 // Cho phép POST đến endpoints công khai mà không cần token
-                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 // Chỉ ADMIN mới được GET danh sách user
                 .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
-                // Tất cả request còn lại phải authenticated
                 .anyRequest().authenticated()
-        );
+        ).csrf(AbstractHttpConfigurer::disable);
 
         // Sử dụng Resource Server JWT
         http.oauth2ResourceServer(oauth2 -> oauth2
@@ -59,6 +68,9 @@ public class SecurityConfig {
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 ).authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
+
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
 
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
@@ -89,4 +101,29 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .openapi("3.0.1") // Khai báo phiên bản OpenAPI hợp lệ
+                .info(new Info()
+                        .title("Booking Service API")
+                        .version("1.0")
+                        .description("Documentation for Booking Service API"))
+                .servers(List.of(new Server().url("http://localhost:8080")));
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 }

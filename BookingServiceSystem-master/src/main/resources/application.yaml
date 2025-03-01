@@ -1,7 +1,6 @@
 server:
   port: 8080
-  servlet:
-    context-path: /BookingService
+  forward-headers-strategy: native
 
 spring:
   datasource:
@@ -33,3 +32,13 @@ jwt:
 beautya:
   feedback:
     link: http://localhost:8080/BookingService/api/feedbacks
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+
+
