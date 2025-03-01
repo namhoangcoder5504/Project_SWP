@@ -22,13 +22,16 @@ public class BlogController {
     private BlogService blogService;
 
     @Autowired
-    private UserService userService;  // Để load full thông tin của author
+    private UserService userService;
+
+    @Autowired
+    private BlogMapper blogMapper;
 
     @GetMapping
     public ResponseEntity<List<BlogResponse>> getAllBlogs() {
         List<BlogResponse> responses = blogService.getAllBlogs()
                 .stream()
-                .map(BlogMapper::toResponse)
+                .map(blogMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
@@ -36,36 +39,37 @@ public class BlogController {
     @GetMapping("/{id}")
     public ResponseEntity<BlogResponse> getBlogById(@PathVariable Long id) {
         return blogService.getBlogById(id)
-                .map(BlogMapper::toResponse)
+                .map(blogMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<BlogResponse> createBlog(@RequestBody Blog blog) {
-        // Lấy đầy đủ thông tin của author từ UserService
         User partialAuthor = blog.getAuthor();
         if (partialAuthor != null && partialAuthor.getUserId() != null) {
             User fullAuthor = userService.getUserById(partialAuthor.getUserId());
             blog.setAuthor(fullAuthor);
         }
         Blog createdBlog = blogService.createBlog(blog);
-        BlogResponse response = BlogMapper.toResponse(createdBlog);
+        BlogResponse response = blogMapper.toResponse(createdBlog);
         return ResponseEntity.ok(response);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long id, @RequestBody Blog blog) {
-        // Tương tự, load full thông tin của author nếu cần
         User partialAuthor = blog.getAuthor();
         if (partialAuthor != null && partialAuthor.getUserId() != null) {
             User fullAuthor = userService.getUserById(partialAuthor.getUserId());
             blog.setAuthor(fullAuthor);
         }
         Blog updatedBlog = blogService.updateBlog(id, blog);
-        BlogResponse response = BlogMapper.toResponse(updatedBlog);
+        BlogResponse response = blogMapper.toResponse(updatedBlog);
         return ResponseEntity.ok(response);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBlog(@PathVariable Long id) {

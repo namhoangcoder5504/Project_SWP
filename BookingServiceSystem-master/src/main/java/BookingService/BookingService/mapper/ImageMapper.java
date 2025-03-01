@@ -1,30 +1,21 @@
 package BookingService.BookingService.mapper;
 
-import BookingService.BookingService.dto.response.ImageResponse;
 import BookingService.BookingService.dto.request.ImageRequest;
+import BookingService.BookingService.dto.response.ImageResponse;
 import BookingService.BookingService.entity.Image;
 import BookingService.BookingService.entity.ServiceEntity;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.time.LocalDateTime;
+@Mapper(componentModel = "spring")
+public interface ImageMapper {
 
-@Component
-public class ImageMapper {
+    @Mapping(target = "imageId", ignore = true) // ID is auto-generated
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())") // Set current time
+    @Mapping(target = "service", source = "service") // Explicitly map service parameter
+    @Mapping(target = "url", source = "request.url") // Map url from request
+    Image toEntity(ImageRequest request, ServiceEntity service);
 
-    public ImageResponse toResponse(Image image) {
-        return ImageResponse.builder()
-                .imageId(image.getImageId())
-                .url(image.getUrl())
-                .createdAt(image.getCreatedAt())
-                .serviceId(image.getService().getServiceId())
-                .build();
-    }
-
-    public Image toEntity(ImageRequest request, ServiceEntity service) {
-        return Image.builder()
-                .url(request.getUrl())
-                .createdAt(LocalDateTime.now())
-                .service(service)
-                .build();
-    }
+    @Mapping(target = "serviceId", source = "service.serviceId") // Map service ID from ServiceEntity
+    ImageResponse toResponse(Image image);
 }

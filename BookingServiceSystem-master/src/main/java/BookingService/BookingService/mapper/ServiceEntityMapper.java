@@ -3,33 +3,18 @@ package BookingService.BookingService.mapper;
 import BookingService.BookingService.dto.request.ServiceEntityRequest;
 import BookingService.BookingService.dto.response.ServiceEntityResponse;
 import BookingService.BookingService.entity.ServiceEntity;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Component
-public class ServiceEntityMapper {
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface ServiceEntityMapper {
 
-    public ServiceEntity toEntity(ServiceEntityRequest request) {
-        if (request == null) return null;
-        return ServiceEntity.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .duration(request.getDuration())
-                .recommendedSkinTypes(request.getRecommendedSkinTypes()) // Ánh xạ trường mới
-                .build();
-    }
+    @Mapping(target = "serviceId", ignore = true) // ID is auto-generated
+    @Mapping(target = "createdAt", ignore = true) // Set in service layer
+    @Mapping(target = "updatedAt", ignore = true) // Set in service layer
+    @Mapping(target = "images", ignore = true) // Managed separately
+    ServiceEntity toEntity(ServiceEntityRequest request);
 
-    public ServiceEntityResponse toResponse(ServiceEntity entity) {
-        if (entity == null) return null;
-        ServiceEntityResponse response = new ServiceEntityResponse();
-        response.setServiceId(entity.getServiceId());
-        response.setName(entity.getName());
-        response.setDescription(entity.getDescription());
-        response.setPrice(entity.getPrice());
-        response.setDuration(entity.getDuration());
-        response.setCreatedAt(entity.getCreatedAt());
-        response.setUpdatedAt(entity.getUpdatedAt());
-        response.setRecommendedSkinTypes(entity.getRecommendedSkinTypes()); // Ánh xạ trường mới
-        return response;
-    }
+    ServiceEntityResponse toResponse(ServiceEntity entity);
 }
