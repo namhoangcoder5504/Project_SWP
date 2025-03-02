@@ -14,7 +14,7 @@
 	<name>Booking_Service</name>
 	<description>Project SWP</description>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 	</properties>
 	<repositories>
