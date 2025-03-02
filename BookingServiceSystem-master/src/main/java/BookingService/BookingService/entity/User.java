@@ -27,6 +27,8 @@ public class User {
     @Column(nullable = false)
     String password;
 
+    @Column(name = "name")
+
     String name;
     String phone;
     String address;

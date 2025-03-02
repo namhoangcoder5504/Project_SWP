@@ -89,7 +89,7 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    private String generateToken(User user) {
+    public String generateToken(User user) {
         try {
             // Tạo header
             JWSHeader header = new JWSHeader(com.nimbusds.jose.JWSAlgorithm.HS512);

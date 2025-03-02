@@ -36,6 +36,21 @@ public class UserService {
     /**
      * Tạo user mới
      */
+    public User saveUser(User user) {
+        // Kiểm tra email trùng
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+        return userRepository.save(user);
+    }
+
+    public User updateUserEntity(User user) {
+        // Kiểm tra xem user có tồn tại không trước khi cập nhật
+        if (!userRepository.existsById(user.getUserId())) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        return userRepository.save(user);
+    }
     public UserResponse createUser(UserCreationRequest request) {
         // Kiểm tra email trùng
         if (userRepository.existsByEmail(request.getEmail())) {

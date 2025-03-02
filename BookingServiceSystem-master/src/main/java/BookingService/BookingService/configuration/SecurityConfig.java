@@ -41,7 +41,8 @@ public class SecurityConfig {
             "/forgotPassword/**",   // forgot password
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/auth/google"
     };
 
     @Value("${jwt.signerKey}")
@@ -60,6 +61,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
                 .anyRequest().authenticated()
         ).csrf(AbstractHttpConfigurer::disable);
+
+
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/oauth2/authorization/google") // Điều hướng đến Google login
+                .defaultSuccessUrl("/auth/google/success", true) // Sau khi login thành công
+                .failureUrl("/auth/google/failure") // Nếu login thất bại
+        );
+
 
         // Sử dụng Resource Server JWT
         http.oauth2ResourceServer(oauth2 -> oauth2
